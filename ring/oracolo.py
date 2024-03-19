@@ -88,12 +88,17 @@ def updateRingLeave(action, listOfNodes):
         return False
 
     nodeToRemove = dictOfNodes[action['id']]
-
+    #scorro la lista of nodes fatte di duple, per cui ogni id è il nodo stesso
     logging.debug('Removing node {}:{}'.format(nodeToRemove['addr'], nodeToRemove['port']))
+    #verifico se l'id di cui sto facendo il...faccia parte del dizionario
     if action['addr'] == nodeToRemove['addr'] and action['port'] == nodeToRemove['port']:
+        #prendo il nodo() se esiste e verifico che l'ip eil porto siano quelligiusti, potrebbe
+        #capitare che l'ip sia sbaglaito  e tolgo un altro nodo, ma con il controllo sul porto ciò non può capitare
         logging.debug('OK:  Remove node {}:{}'.format(action['addr'],action['port']))
+
         listOfNodes.remove(nodeToRemove)
     else:
+        #esco se non esiste 
         logging.debug('NOK: Remove node {}:{}'.format(action['addr'],action['port']))
         return False
     #
@@ -114,9 +119,12 @@ def updateRing(action, listOfNodes, oracleSocket):
     sendConfigurationToAll(listOfNodes, oracleSocket)
     
     return result
-
+#viene fatto semplicemente un invio dei messaggi a tutti
 def sendConfigurationToAll(listOfNodes, oracleSocket):
     N = len(listOfNodes)
+    #ciclo for sulla listofnodes aggiornata
+    #identifico il nodo successivo per ogni nodo
+    #gli dico il nodo 
     for idx, node in enumerate(listOfNodes):
         if idx == N-1:
             nextNode = listOfNodes[0]
@@ -125,10 +133,11 @@ def sendConfigurationToAll(listOfNodes, oracleSocket):
         #logging.debug('UPDATE NODE: ({}) {}:{} --> ({}) {}:{}'.format(\
         #        node['id'],     node['addr'],     node['port'], \
         #        nextNode['id'], nextNode['addr'], nextNode['port']))
-
+        #prendo i riferimenti del nodo da contattare
         addr, port = node['addr'], int(node['port'])
         message = {}
         message['id'] = node['id']
+        #messaggio è un json che contiene l'id a cui appartiene lui, e le info sul nextcode 
         message['nextNode'] = nextNode
         message = '[CONF] {}'.format(json.dumps(message))
         logging.debug('UPDATE MESSAGE: {}'.format(message))
